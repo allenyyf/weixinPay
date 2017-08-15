@@ -14,6 +14,7 @@ export class expressServer {
 
     init() {
         this.server = Express()
+        this.server.use(Express.static("../webapp"))
         this.server.use(bodyParser.json())
         this.server.use(bodyParser.urlencoded())
         this.server.listen(this.port, this.host, (err, result) => {
