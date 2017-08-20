@@ -69,5 +69,13 @@ export declare namespace WechatOption {
     // 公众号支付 原生扫码支付 app支付 刷卡支付
     type tradeType = "JSAPI" | "NATIVE" | "APP" | "MICROPAY"
 
+
+    interface wxAccessToken {
+        access_token: string
+        expires_in: number
+    }
+
+    interface
+
 }
 

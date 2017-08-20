@@ -3,7 +3,7 @@ window.onload = function () {
     bindEvent();
 };
 //公司，家
-var ip = ["192.168.0.112", "192.168.11.144"];
+var ip = ["192.168.0.100", "192.168.11.144"];
 var wechatVersion = 0;
 function checkWeixinVision() {
     var ua = navigator.userAgent.toLowerCase();
@@ -33,7 +33,7 @@ function bindEvent() {
             }
         };
         console.log(location.href);
-        xhr.open("POST", "http://192.168.0.112:3000/createOrder");
+        xhr.open("POST", "http://192.168.0.100:3000/createOrder");
         xhr.setRequestHeader("Content-type", "application/x-www-form-urlencoded");
         xhr.send(wechatVersion);
     });

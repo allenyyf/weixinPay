@@ -1,86 +1,62 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+var wexinSetting = require("./weixinSetting");
+var wechatGenerateService_1 = require("./wechatGenerateService");
 var GenerateWechatCommandOrder = (function () {
     function GenerateWechatCommandOrder() {
+        this.wechatGenerateService = new wechatGenerateService_1.WechatGenerateService();
+        this.requestUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder";
     }
-    GenerateWechatCommandOrder.prototype.generateRandomString = function (length) {
-        var text = " ";
-        var charset = "abcdefghijklmnopqrstuvwxyz0123456789";
-        for (var i = 0; i < length; i++)
-            text += charset.charAt(Math.floor(Math.random() * charset.length));
-        return text;
-    };
-    GenerateWechatCommandOrder.prototype.generateTimestamp = function () {
+    GenerateWechatCommandOrder.prototype.generatePreOrderOption = function () {
         var time = new Date();
-        var millisecond = time.getTime();
-        var seconde = Math.round(millisecond / 1000);
-    };
-    GenerateWechatCommandOrder.prototype.generateDealStartTime = function () {
-        var time = new Date();
-        var year = time.getFullYear().toString();
-        var month = (time.getMonth() + 1).toString();
-        var date = time.getDate().toString();
-        var hour = time.getHours().toString();
-        var minute = time.getMinutes().toString();
-        var second = time.getSeconds().toString();
-        var startTime = year + month + date + hour + minute + second;
-        return startTime;
-    };
-    GenerateWechatCommandOrder.prototype.generateOrderNumber = function () {
-        var time = this.generateDealStartTime();
-        var randomString = this.generateRandomString(15);
-        var orderNumber = time + randomString;
-        return orderNumber;
-    };
-    GenerateWechatCommandOrder.prototype.generateCustomerIp = function () {
-    };
-    GenerateWechatCommandOrder.prototype.generateSignature = function (option) {
-        var copyOption = JSON.parse(JSON.stringify(option));
-        var arrayOption = [];
-        var sortArrayOption = [];
-        var signatureString = "";
-        for (var key in copyOption) {
-            var value = copyOption[key];
-            var keyValue = key + ":" + value;
-            arrayOption.push(keyValue);
-        }
-        var len = arrayOption.length;
-        for (var i = 0; i < len; i++) {
-            for (var j = len - 1; j > i; j--) {
-                var nextKey = arrayOption[j].split(":")[0];
-                var key = arrayOption[j - 1].split(":")[0];
-                var keyLenght = key.length;
-                var nextKeyLength = nextKey.length;
-                var minLength = Math.min(keyLenght, nextKeyLength);
-                for (var k = 0; k < minLength; k++) {
-                    if (key.charCodeAt(k) < nextKey.charCodeAt(k)) {
-                        break;
-                    }
-                    else if (key.charCodeAt(k) == nextKey.charCodeAt(k)) {
-                        if (k + 1 == minLength) {
-                            if (minLength == nextKeyLength) {
-                                var originKeyValue = arrayOption[j - 1];
-                                arrayOption[j - 1] = arrayOption[j];
-                                arrayOption[j] = originKeyValue;
-                            }
-                        }
-                    }
-                    else {
-                        var originKeyValue = arrayOption[j - 1];
-                        arrayOption[j - 1] = arrayOption[j];
-                        arrayOption[j] = originKeyValue;
-                        break;
-                    }
-                }
-            }
-        }
-        arrayOption.forEach(function (keyValue) {
-            var keyValueArray = keyValue.split(":");
-            if (keyValueArray[1]) {
-                signatureString += keyValueArray[0] + "=" + keyValueArray[1] + "&";
-            }
-        });
-        return signatureString.slice(0, -1);
+        // let noceStr =
+        var option = {
+            appid: wexinSetting.appid,
+            mch_id: wexinSetting.mch_id,
+            //device_info?: string
+            nonce_str: this.wechatGenerateService.generateRandomString(20)
+            //签名
+            ,
+            //签名
+            sign: string,
+            //签名类型 sign_type?: "MD5" | "HMACSHA256"
+            //商品描述
+            body: wexinSetting.body,
+            //商品详情 detail?: string
+            //附加信息 attach?: string
+            //商品订单号
+            out_trade_no: this.wechatGenerateService.generateOrderNumber(time)
+            //货币币种 fee_type?: string
+            //标价金额
+            ,
+            //货币币种 fee_type?: string
+            //标价金额
+            total_fee: number
+            //终端ip
+            ,
+            //终端ip
+            spbill_create_ip: string
+            //订单生成时间
+            ,
+            //订单生成时间
+            time_start: this.wechatGenerateService.dealTimeFormat(time),
+            //订单结束时间
+            time_expire: this.wechatGenerateService.generateDealEndTime(time, 30),
+            //订单优惠tag goods_tag?: string,
+            // 微信支付回调通知支付结果
+            notify_url: wexinSetting.url,
+            trade_type: "JSAPI"
+            //trade_type 为NATIVE 及扫码支付 必填 product_id?: string
+            // 微信支付是否支持信用卡支付
+            ,
+            //trade_type 为NATIVE 及扫码支付 必填 product_id?: string
+            // 微信支付是否支持信用卡支付
+            limit_pay: "no_credit"
+            //用户标识 trade_type=JSAPI时（即公众号支付），此参数必传，
+            ,
+            //用户标识 trade_type=JSAPI时（即公众号支付），此参数必传，
+            openid: string
+        };
     };
     return GenerateWechatCommandOrder;
 }());

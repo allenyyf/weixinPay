@@ -1,90 +1,69 @@
-
-import * as Model from "../model"
+import * as request from 'request';
+import * as Model from '../model';
+import * as wexinSetting from "./weixinSetting"
+import { WechatGenerateService } from "./wechatGenerateService"
 export class GenerateWechatCommandOrder {
-    generateRandomString(length) {
-        let text = " ";
-        let charset = "abcdefghijklmnopqrstuvwxyz0123456789";
-        for (let i = 0; i < length; i++)
-            text += charset.charAt(Math.floor(Math.random() * charset.length));
-        return text;
-    }
+    wechatGenerateService = new WechatGenerateService()
+    requestUrl = "https://api.mch.weixin.qq.com/pay/unifiedorder"
 
-    generateTimestamp() {
+
+    generatePreOrderOption() {
         let time = new Date()
-        let millisecond = time.getTime()
-        let seconde = Math.round(millisecond / 1000)
-    }
+        // let noceStr =
+        let option: Model.WechatOption.CommonOrderWeChatOption{
+            appid: wexinSetting.appid,
+            mch_id: wexinSetting.mch_id,
+            //device_info?: string
+            nonce_str: this.wechatGenerateService.generateRandomString(20)
 
-    generateDealStartTime() {
-        let time = new Date()
-        let year = time.getFullYear().toString()
-        let month = (time.getMonth() + 1).toString()
-        let date = time.getDate().toString()
-        let hour = time.getHours().toString()
-        let minute = time.getMinutes().toString()
-        let second = time.getSeconds().toString()
-        let startTime = year + month + date + hour + minute + second
-        return startTime
-    }
+                    //签名
+                    sign: string,
+            //签名类型 sign_type?: "MD5" | "HMACSHA256"
 
-    generateOrderNumber() {
-        let time = this.generateDealStartTime()
-        let randomString = this.generateRandomString(15)
-        let orderNumber = time + randomString
-        return orderNumber
-    }
-
-    generateCustomerIp() {
-
-    }
+            //商品描述
+            body: wexinSetting.body,
+            //商品详情 detail?: string
 
 
-    generateSignature(option) {
-        let copyOption = JSON.parse(JSON.stringify(option))
-        let arrayOption = []
-        let sortArrayOption = []
-        let signatureString = ""
-        for (let key in copyOption) {
-            let value = copyOption[key]
-            let keyValue = `${key}:${value}`
-            arrayOption.push(keyValue)
+            //附加信息 attach?: string
+
+            //商品订单号
+            out_trade_no: this.wechatGenerateService.generateOrderNumber(time)
+
+
+                //货币币种 fee_type?: string
+
+                //标价金额
+                total_fee: number
+
+                //终端ip
+                spbill_create_ip: string
+
+                //订单生成时间
+                time_start?: this.wechatGenerateService.dealTimeFormat(time),
+
+            //订单结束时间
+            time_expire: this.wechatGenerateService.generateDealEndTime(time, 30),
+
+
+            //订单优惠tag goods_tag?: string,
+
+            // 微信支付回调通知支付结果
+            notify_url: wexinSetting.url,
+
+            trade_type: "JSAPI"
+
+
+                //trade_type 为NATIVE 及扫码支付 必填 product_id?: string
+
+                // 微信支付是否支持信用卡支付
+                limit_pay?: "no_credit"
+
+                //用户标识 trade_type=JSAPI时（即公众号支付），此参数必传，
+                openid: string
         }
-        let len = arrayOption.length
-        for (let i = 0; i < len; i++) {
-            for (let j = len - 1; j > i; j--) {
-                let nextKey = arrayOption[j].split(":")[0]
-                let key = arrayOption[j - 1].split(":")[0]
-                let keyLenght = key.length
-                let nextKeyLength = nextKey.length
-                let minLength = Math.min(keyLenght, nextKeyLength)
-                for (let k = 0; k < minLength; k++) {
-                    if (key.charCodeAt(k) < nextKey.charCodeAt(k)) {
-                        break
-                    } else if (key.charCodeAt(k) == nextKey.charCodeAt(k)) {
-                        if (k + 1 == minLength) {
-                            if (minLength == nextKeyLength) {
-                                let originKeyValue = arrayOption[j - 1]
-                                arrayOption[j - 1] = arrayOption[j]
-                                arrayOption[j] = originKeyValue
-                            }
-                        }
-                    } else {
-                        let originKeyValue = arrayOption[j - 1]
-                        arrayOption[j - 1] = arrayOption[j]
-                        arrayOption[j] = originKeyValue
-                        break
-                    }
-                }
-            }
-        }
-        arrayOption.forEach((keyValue) => {
-            let keyValueArray = keyValue.split(":")
-            if (keyValueArray[1]) {
-                signatureString += `${keyValueArray[0]}=${keyValueArray[1]}&`
-            }
-        })
-        return signatureString.slice(0, -1)
     }
+
 }
 
 
